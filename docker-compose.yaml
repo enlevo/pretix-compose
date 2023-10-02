@@ -6,21 +6,36 @@ services:
     restart: unless-stopped
     command: all
     ports:
-      - 80:80
+      - 10000:80
     volumes:
       - ./data/app:/data
       - ./pretix.cfg:/etc/pretix/pretix.cfg:ro
     depends_on:
       - db
       - cache
+    networks:
+      - backend
 
   db:
-    image: postgres:14-alpine
+    image: postgres:13-alpine3.18
+    container_name: database
+    ports:
+      - "5432:5432"
     restart: unless-stopped
     env_file: .env
     volumes:
       - ./data/db:/var/lib/postgresql/data
+    networks:
+      - backend
 
   cache:
     image: redis:6-alpine
+    ports:
+      - "6379:6379"
     restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: false
